@@ -1,11 +1,11 @@
 name: Compilar UACME
 
 on:
-  workflow_dispatch: # Esto permite activar la compilación con un botón manual
+  workflow_dispatch:
 
 jobs:
   build:
-    runs-on: windows-latest # Usamos una máquina virtual de Windows
+    runs-on: windows-latest
 
     steps:
     - name: Clonar repositorio
@@ -15,10 +15,16 @@ jobs:
       uses: microsoft/setup-msbuild@v1.1
 
     - name: Compilar Akagi64 (Release)
-      run: msbuild Source/Akagi/Akagi.vcxproj /p:Configuration=Release /p:Platform=x64
+      # CAMBIO IMPORTANTE: Apuntamos al .sln y usamos /t:Akagi
+      run: msbuild Source/UACME.sln /p:Configuration=Release /p:Platform=x64 /t:Akagi
+
+    - name: Listar archivos (Debug)
+      # Este paso es opcional, ayuda a ver dónde quedó el archivo si falla la subida
+      run: Get-ChildItem -Path Source -Recurse -Filter *.exe
 
     - name: Subir el ejecutable (Artifact)
       uses: actions/upload-artifact@v4
       with:
         name: Akagi64-Ejecutable
+        # La ruta de salida estándar para este repo
         path: Source/Akagi/output/x64/Release/Akagi64.exe
