@@ -15,16 +15,17 @@ jobs:
       uses: microsoft/setup-msbuild@v1.1
 
     - name: Compilar Akagi64 (Release)
-      # CAMBIO IMPORTANTE: Apuntamos al .sln y usamos /t:Akagi
-      run: msbuild Source/UACME.sln /p:Configuration=Release /p:Platform=x64 /t:Akagi
+      # SOLUCIÓN: Agregamos /p:PlatformToolset=v143 para usar el compilador estándar de VS2022
+      # También agregamos /p:WindowsTargetPlatformVersion=10.0 para usar el SDK disponible
+      run: msbuild Source/UACME.sln /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0 /t:Akagi
 
     - name: Listar archivos (Debug)
-      # Este paso es opcional, ayuda a ver dónde quedó el archivo si falla la subida
-      run: Get-ChildItem -Path Source -Recurse -Filter *.exe
+      # Esto nos mostrará si el archivo se creó, aunque falle la subida
+      run: Get-ChildItem -Path Source -Recurse -Filter Akagi64.exe
 
     - name: Subir el ejecutable (Artifact)
       uses: actions/upload-artifact@v4
       with:
         name: Akagi64-Ejecutable
-        # La ruta de salida estándar para este repo
+        # Ajustamos la ruta por si acaso. Si falla aquí, revisa el log del paso anterior "Listar archivos"
         path: Source/Akagi/output/x64/Release/Akagi64.exe
